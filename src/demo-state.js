@@ -56,8 +56,14 @@ export const apps = [
     id: 'tokens',
     name: 'Tokens',
     instances: [{ id: 'ant', name: 'ANT' }, { id: 'token', name: 'TOKEN' }],
+    alwaysDisplayInstances: true,
   },
-  { id: 'voting', name: 'Voting', instances: [{ id: 'ant', name: 'ANT' }] },
+  {
+    id: 'voting',
+    name: 'Voting',
+    instances: [{ id: 'ant', name: 'ANT' }],
+    alwaysDisplayInstances: true,
+  },
   {
     id: 'groups',
     name: 'Groups',
@@ -65,20 +71,37 @@ export const apps = [
       { id: 'core', name: 'Core Devs' },
       { id: 'community', name: 'Community Devs' },
     ],
+    alwaysDisplayInstances: true,
   },
-  { id: 'finance', name: 'Finance' },
+  {
+    id: 'finance',
+    name: 'Finance',
+    instances: [{ id: 'finance', name: 'Finance' }],
+    alwaysDisplayInstances: false,
+  },
   {
     id: 'fundraising',
     name: 'Fundraising',
-    instances: [{ id: 'ant', name: 'ANT' }],
+    instances: [{ id: 'fundraising', name: 'Fundraising' }],
+    alwaysDisplayInstances: false,
   },
-  { id: 'permissions', name: 'Permissions' },
-  { id: 'identity', name: 'Identity' },
+  {
+    id: 'permissions',
+    name: 'Permissions',
+    instances: [{ id: 'permissions', name: 'Permissions' }],
+    alwaysDisplayInstances: false,
+  },
+  {
+    id: 'identity',
+    name: 'Identity',
+    instances: [{ id: 'identity', name: 'Identity' }],
+    alwaysDisplayInstances: false,
+  },
 ]
 
 export const tokens = [
   { symbol: 'XVT', name: 'Voting Token', amount: '100097995', value: 70 },
-  { symbol: 'LIS', name: 'Lorem Ipsum Token', amount: '10002', value: 30 },
+  { symbol: 'LIS', name: 'Voting Token', amount: '10002', value: 30 },
 ]
 
 export const prices = [
@@ -95,3 +118,56 @@ export const homeActions = [
   { id: 'check-finance', label: 'Check Finance', app: 'finance' },
   { id: 'new-payment', label: 'New Payment', app: 'tokens' },
 ]
+
+export const permissions = {
+  entities: [
+    { id: 1, label: 'Wandering Thunder', badge: { label: 'You' } },
+    { id: 2, label: 'Black Wildflower' },
+    { id: 3, label: 'Black Wildflower' },
+    { id: 4, label: 'Black Wildflower' },
+    { id: 5, label: 'Black Wildflower' },
+    { id: 6, label: 'Black Wildflower' },
+  ],
+  actions: [
+    {
+      title: 'Open a new voting',
+      summary: `
+        Approved votings will perform the given action as if they were executed
+        by this app
+      `,
+      canPerform: [['Tokens', 'ANT'], ['Multisig'], ['Groups', 'Core Devs']],
+      canRevoke: [['Multisig']],
+    },
+    {
+      title: 'Stop an open voting',
+      summary: `
+        Will stop an open voting and won’t perform the voting’s action
+      `,
+      canPerform: [['Tokens', 'ANT'], ['Multisig'], ['Groups', 'Core Devs']],
+      canRevoke: [['Multisig']],
+    },
+  ],
+  assigned: [
+    {
+      title: 'Issue new tokens on Tokens (ANT)',
+      summary: `
+        Will mint new ANT tokens
+      `,
+      canRevoke: 'Multisig',
+    },
+    {
+      title: 'Create new permissions on Kernel',
+      summary: `
+        Will create new permissions if the receiving actions and entities…
+      `,
+      canRevoke: 'Multisig',
+    },
+    {
+      title: 'Create a new public token sale on Fundraising (ANT)',
+      summary: `
+        Will create a new public token sale and will be able to receive funds…
+      `,
+      canRevoke: 'Multisig',
+    },
+  ],
+}

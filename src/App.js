@@ -9,6 +9,7 @@ import { apps, notifications, tokens, prices, homeActions } from './demo-state'
 class App extends React.Component {
   state = {
     path: '',
+    search: '',
     sidePanelOpened: false,
     notifications,
   }
@@ -16,6 +17,7 @@ class App extends React.Component {
     super()
     this.history = createHistory()
     this.state.path = this.history.location.pathname
+    this.state.search = this.history.location.search || ''
     this.history.listen(this.handleNavigation)
   }
   appInstance() {
@@ -23,20 +25,33 @@ class App extends React.Component {
     if (!matches) {
       return { appId: 'home', instanceId: '' }
     }
+
+    const { search } = this.state
+    const params = search && search.split('?params=')[1]
     return {
       appId: matches[1],
       instanceId: matches[2],
+      params: params ? JSON.parse(decodeURIComponent(params)) : null,
     }
   }
-  changePath = path => {
-    if (path !== this.state.path) {
-      this.history.push(path)
+  changePath = (path, search = '') => {
+    const { state } = this
+    if (path !== state.path || search !== state.search) {
+      this.history.push(path + search)
     }
   }
-  handleNavigation = location => {
-    this.setState({ path: location.pathname })
+  handleNavigation = ({ pathname, search }) => {
+    this.setState({ path: pathname, search })
   }
-  handleOpenApp = (appId, instanceId) => {
+  handleParamsRequest = params => {
+    const { appId, instanceId } = this.appInstance()
+    this.openApp(
+      appId,
+      instanceId,
+      params ? encodeURIComponent(JSON.stringify(params)) : null
+    )
+  }
+  openApp = (appId, instanceId, params) => {
     if (appId === 'home') {
       this.changePath('/')
       return
@@ -55,7 +70,10 @@ class App extends React.Component {
       ? instances.find(({ id }) => id === instanceId)
       : instances[0]
 
-    this.changePath(`/${appId}${instance ? `/${instance.id}` : ''}`)
+    this.changePath(
+      `/${appId}${instance ? `/${instance.id}` : ''}`,
+      params ? `?params=${params}` : ''
+    )
   }
   openSidePanel = () => {
     this.setState({ sidePanelOpened: true })
@@ -65,7 +83,7 @@ class App extends React.Component {
   }
   render() {
     const { notifications } = this.state
-    const { appId, instanceId } = this.appInstance()
+    const { appId, instanceId, params } = this.appInstance()
     return (
       <AragonApp publicUrl="/aragon-ui/">
         <Main>
@@ -74,7 +92,7 @@ class App extends React.Component {
             activeAppId={appId}
             activeInstanceId={instanceId}
             notifications={notifications}
-            onOpenApp={this.handleOpenApp}
+            onOpenApp={this.openApp}
           />
           <AppScreen>
             {appId === 'home' && (
@@ -82,10 +100,16 @@ class App extends React.Component {
                 tokens={tokens}
                 prices={prices}
                 actions={homeActions}
-                onOpenApp={this.handleOpenApp}
+                onOpenApp={this.openApp}
               />
             )}
-            {app === 'permissions' && <Permissions />}
+            {appId === 'permissions' && (
+              <Permissions
+                apps={apps}
+                params={params}
+                onParamsRequest={this.handleParamsRequest}
+              />
+            )}
           </AppScreen>
         </Main>
       </AragonApp>
